@@ -49,7 +49,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="instructions">
       <h3>測驗說明：</h3>
       <ul>
-        <li>每次試驗請按一次按鈕開始，並在心中估計10秒的時間長度，覺得10秒到了就再按一次按鈕</li>
+        <li>每次試驗請按下開始按鈕，並在心中估計10秒的時間長度，覺得10秒到了就按下結束按鈕</li>
         <li>請勿使用手錶、手機或其他方式計時，也請不要偷看任何有顯示時間的物件</li>
       </ul>
     </div>
@@ -111,7 +111,7 @@ function onPress(){
   const now=performance.now();
   if(S.phase==='ready'){
     S.t0=now;S.phase='running';
-    $('prompt').textContent='覺得10秒到了，請再按一次';
+    $('prompt').textContent='覺得10秒到了，請按下結束按鈕';
     const b=$('main-btn');b.textContent='結束';b.classList.add('running');
   }else if(S.phase==='running'){
     S.results.push({trial:S.trial+1,produced:Math.round(now-S.t0),timestamp:new Date().toISOString()});
