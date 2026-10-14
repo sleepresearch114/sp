@@ -51,6 +51,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <ul>
         <li>每次試驗請按下開始按鈕，並在心中估計10秒的時間長度，覺得10秒到了就按下結束按鈕</li>
         <li>請勿使用手錶、手機或其他方式計時，也請不要偷看任何有顯示時間的物件</li>
+        <li>共10次試驗，每次試驗之間會有一段隨機長度的間隔</li>
+        <li>準備好後按下下方按鈕進行1次練習，隨後開始正式測驗</li>
       </ul>
     </div>
     <button class="button primary" onclick="startSession()">開始測驗</button>
@@ -84,8 +86,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <script>
 const TARGET_MS=10000;   // 目標時間間隔
-const TRIALS=15;         // 試驗次數
-const ITI_MS=30000;      // 試驗間隔
+const TRIALS=10;         // 試驗次數
+const ITI_MIN_MS=10000, ITI_MAX_MS=30000;      // 試驗間隔
 
 function fresh(){return{subjectId:'',trial:0,phase:'idle',t0:0,results:[],start:null,end:null,timer:null};}
 let S=fresh();
@@ -95,8 +97,8 @@ function show(id){['setup','test','done'].forEach(s=>$(s).classList.add('hidden'
 
 function setReady(){
   S.phase='ready';
-  $('trial-info').textContent=`第 ${S.trial+1} / ${TRIALS} 次`;
-  $('prompt').textContent='請按下按鈕開始，並在心中估計10秒';
+  $('trial-info').textContent=S.practice?'練習':`第 ${S.trial+1} / ${TRIALS} 次`;
+  $('prompt').textContent=S.practice?'練習：請按下按鈕開始，並在心中估計10秒':'請按下按鈕開始，並在心中估計10秒';
   const b=$('main-btn');b.textContent='開始';b.disabled=false;b.classList.remove('running');
 }
 
@@ -111,18 +113,27 @@ function onPress(){
   const now=performance.now();
   if(S.phase==='ready'){
     S.t0=now;S.phase='running';
-    $('prompt').textContent='覺得10秒到了，請按下結束按鈕';
+    $('prompt').textContent='覺得10秒到了時請按下結束按鈕';
     const b=$('main-btn');b.textContent='結束';b.classList.add('running');
+  }else if(S.phase==='practiceDone'){
+    if(now-S.t0<800)return;
+    S.practice=false;S.trial=0;S.curIti=null;setReady();
+  }else if(S.phase==='running'&&S.practice){
+    const dur=now-S.t0;S.t0=now;
+    S.phase='practiceDone';
+    $('prompt').textContent=`您估計的時間是 ${(dur/1000).toFixed(2)} 秒（目標為10秒）。接下來是正式測驗，不會提供秒數回饋。`;
+    const b=$('main-btn');b.textContent='開始正式測驗';b.classList.remove('running');
   }else if(S.phase==='running'){
-    S.results.push({trial:S.trial+1,produced:Math.round(now-S.t0),timestamp:new Date().toISOString()});
+    S.results.push({trial:S.trial+1,produced:Math.round(now-S.t0),iti:S.curIti===null?null:Math.round(S.curIti),timestamp:new Date().toISOString()});
     S.phase='waiting';
     const b=$('main-btn');b.disabled=true;b.classList.remove('running');b.textContent='開始';
     if(S.trial>=TRIALS-1){
       $('prompt').textContent='已記錄';
       S.timer=setTimeout(finish,1000);
     }else{
-      $('prompt').textContent='已記錄，請稍候下一次試驗';
-      S.timer=setTimeout(()=>{S.trial++;setReady();},ITI_MS);
+      $('prompt').textContent='已記錄，請稍做休息準備下一次試驗';
+      const iti=ITI_MIN_MS+Math.random()*(ITI_MAX_MS-ITI_MIN_MS);
+      S.timer=setTimeout(()=>{S.trial++;setReady();},iti);
     }
   }
 }
