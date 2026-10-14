@@ -314,25 +314,6 @@
     </div>
 
     <script>
-        // 1. 徹底阻止雙擊縮放 (Double-tap to zoom)
-  let lastTouchEndTime = 0;
-  document.addEventListener('touchend', function (event) {
-    const currentTime = Date.now();
-    // 兩次點擊時間差小於 300 毫秒，判定為雙擊
-    if (currentTime - lastTouchEndTime <= 300) {
-      event.preventDefault(); // 阻止瀏覽器預設的放大行為
-    }
-    lastTouchEndTime = currentTime;
-  }, false);
-
-  // 2. 徹底阻止雙指捏合縮放 (Pinch-to-zoom)
-  document.addEventListener('touchmove', function (event) {
-    // 當畫面上超過一個觸控點（雙指以上操作）時
-    if (event.touches.length > 1) {
-      event.preventDefault(); // 阻止多指縮放
-    }
-  }, { passive: false }); // 必須設為 passive: false，iOS 才能成功攔截
-</script>
         // 正式測驗時顯示的固定訊息（不提供任何回饋）
         const RECORDED_MESSAGE = '已記錄反應';
 
