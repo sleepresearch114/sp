@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反應時間測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #000;
+            color: white;
+            min-height: 100vh;
+            padding: 16px;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .card {
+            background-color: #000;
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid #374151;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #4b5563;
+            background-color: #1f2937;
+            color: white;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .instructions {
+            margin-bottom: 24px;
+        }
+
+        .instructions h3 {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .instructions ul {
+            color: #9ca3af;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .instructions li {
+            margin-bottom: 4px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .button-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .button-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .button-success:hover {
+            background-color: #059669;
+        }
+
+        .button-warning {
+            background-color: #f59e0b;
+            color: white;
+            font-size: 18px;
+            padding: 16px;
+        }
+
+        .button-warning:hover {
+            background-color: #d97706;
+        }
+
+        .button-warning:active {
+            background-color: #b45309;
+        }
+
+        .button-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .button-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .test-area {
+            margin-bottom: 16px;
+        }
+
+        .status {
+            text-align: center;
+            margin-bottom: 16px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .red-box {
+            width: 50%;
+            height: 96px;
+            margin: 0 auto 16px;
+            border: 4px solid #ef4444;
+            background-color: #fef2f2;
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .counter {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #fbbf24;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: black;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .results-table {
+            max-height: 192px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #374151;
+            border-radius: 4px;
+        }
+
+        .table {
+            width: 100%;
+            font-size: 12px;
+            color: white;
+        }
+
+        .table th {
+            background-color: #1f2937;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table td {
+            padding: 8px;
+            border-bottom: 1px solid #374151;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .button-group .button {
+            flex: 1;
+        }
+
+        .result-info {
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .result-info p {
+            margin-bottom: 4px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">反應時間測試</h1>
+            <p class="subtitle">Reaction Time Test</p>
+        </div>
+
+        <!-- Setup Stage -->
+        <div id="setup-stage" class="card">
+            <div class="form-group">
+                <label class="label">👤 受測者編號</label>
+                <input type="text" id="subject-id" class="input" placeholder="輸入編號">
+            </div>
+            <div class="instructions">
+                <h3>測驗說明：</h3>
+                <ul>
+                    <li>• 請注意紅色方框，當黃色計數器出現時立即按下按鈕</li>
+                    <li>• 請以慣用手之單一指頭按按鈕</li>
+                    <li>• 先進行5次練習，再進行正式測驗</li>
+                </ul>
+            </div>
+            <button class="button button-primary" onclick="startPractice()">
+                ▶️ 開始練習
+            </button>
+        </div>
+
+        <!-- Ready Stage -->
+        <div id="ready-stage" class="card hidden">
+            <h2 class="text-center" style="margin-bottom: 16px;">練習完成！</h2>
+            <p class="text-center" style="color: #9ca3af; margin-bottom: 24px;">準備開始正式測驗</p>
+            <button class="button button-success" onclick="startTest()">
+                ▶️ 開始正式測驗
+            </button>
+        </div>
+
+        <!-- Test Stage -->
+        <div id="test-stage" class="card hidden">
+            <div class="status">
+                <div id="stage-info"></div>
+            </div>
+            <div class="test-area">
+                <div class="red-box">
+                    <div id="counter" class="counter hidden"></div>
+                    <div id="practice-message" class="text-center hidden">
+                        <div style="color: #9ca3af; font-size: 18px; margin-bottom: 8px;" id="message-text">注意紅色方框，準備按鈕！</div>
+                    </div>
+                </div>
+                <button class="button button-warning" onclick="handleButtonPress()">
+                    按下停止計數器
+                </button>
+            </div>
+            <div id="test-message" class="message hidden"></div>
+        </div>
+
+        <!-- Results Stage -->
+        <div id="results-stage" class="card hidden">
+            <h2 class="text-center" style="margin-bottom: 16px;">測驗結果</h2>
+            <div class="result-info" id="result-info"></div>
+            <div class="results-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>試驗</th>
+                            <th>ISI(ms)</th>
+                            <th>結果</th>
+                            <th>RT(ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-tbody"></tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="button button-primary" onclick="downloadResults()">
+                    📥 下載結果
+                </button>
+                <button class="button button-secondary" onclick="resetTest()">
+                    🔄 重新測驗
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 應用程式狀態
+        let appState = {
+            stage: 'setup',
+            subjectId: '',
+            currentTrial: 0,
+            practiceCount: 0,
+            showCounter: false,
+            startTime: null,
+            sessionStartTime: null,
+            sessionEndTime: null,
+            message: '準備開始',
+            results: [],
+            counter: 0,
+            currentISI: 0,
+            waitingForResponse: false,
+            testActive: false
+        };
+
+        // 計時器引用
+        let timers = {
+            counter: null,
+            responseTimeout: null,
+            isiTimeout: null,
+            testTimeout: null,
+            nextTrialTimeout: null
+        };
+
+        // 生成隨機ISI (2-10秒)
+        function generateISI() {
+            return Math.floor(Math.random() * 8000) + 2000;
+        }
+
+        // 清除所有計時器
+        function clearAllTimers() {
+            Object.values(timers).forEach(timer => {
+                if (timer) clearInterval(timer);
+                if (timer) clearTimeout(timer);
+            });
+            Object.keys(timers).forEach(key => timers[key] = null);
+        }
+
+        // 顯示特定階段
+        function showStage(stage) {
+            const stages = ['setup', 'ready', 'test', 'results'];
+            stages.forEach(s => {
+                document.getElementById(`${s}-stage`).classList.add('hidden');
+            });
+            document.getElementById(`${stage}-stage`).classList.remove('hidden');
+        }
+
+        // 開始新的trial
+        function startTrial() {
+            if (appState.stage === 'test' && !appState.testActive) {
+                return;
+            }
+
+            clearAllTimers();
+            appState.showCounter = false;
+            appState.message = '注意紅色方框，準備按鈕！';
+            appState.waitingForResponse = false;
+
+            updateUI();
+
+            const isi = generateISI();
+            appState.currentISI = isi;
+
+            timers.isiTimeout = setTimeout(() => {
+                if (appState.stage === 'test' && !appState.testActive) {
+                    return;
+                }
+
+                appState.showCounter = true;
+                appState.counter = 0;
+                appState.startTime = Date.now();
+                appState.waitingForResponse = true;
+                appState.message = '按下按鈕停止計數器！';
+
+                updateUI();
+
+                // 開始計數器
+                timers.counter = setInterval(() => {
+                    appState.counter++;
+                    document.getElementById('counter').textContent = appState.counter;
+                }, 1);
+
+                // 30秒無反應超時
+                timers.responseTimeout = setTimeout(() => {
+                    handleNoResponse();
+                }, 30000);
+            }, isi);
+        }
+
+        // 處理按鈕點擊
+        function handleButtonPress() {
+            if (appState.stage === 'practice' || (appState.stage === 'test' && appState.testActive)) {
+                if (!appState.waitingForResponse) {
+                    // 太早按下 - false start
+                    clearAllTimers();
+                    appState.showCounter = false;
+                    appState.message = '太早按下！請等待黃色計數器出現';
+
+                    const result = {
+                        trial: appState.stage === 'practice' ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
+                        isi: appState.currentISI,
+                        result: 'false_start',
+                        rt: null,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    if (appState.stage === 'test') {
+                        appState.results.push(result);
+                    }
+
+                    updateUI();
+
+                    timers.nextTrialTimeout = setTimeout(() => {
+                        moveToNextTrial();
+                    }, 1000);
+                } else {
+                    // 正確反應
+                    const reactionTime = Date.now() - appState.startTime;
+                    clearAllTimers();
+                    appState.showCounter = false;
+                    appState.message = `反應時間: ${reactionTime} ms`;
+
+                    const result = {
+                        trial: appState.stage === 'practice' ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
+                        isi: appState.currentISI,
+                        result: 'success',
+                        rt: reactionTime,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    if (appState.stage === 'test') {
+                        appState.results.push(result);
+                    }
+
+                    updateUI();
+
+                    timers.nextTrialTimeout = setTimeout(() => {
+                        moveToNextTrial();
+                    }, 1000);
+                }
+            }
+        }
+
+        // 處理無反應
+        function handleNoResponse() {
+            clearAllTimers();
+            appState.showCounter = false;
+            appState.message = '無反應！';
+            appState.waitingForResponse = false;
+
+            const result = {
+                trial: appState.stage === 'practice' ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
+                isi: appState.currentISI,
+                result: 'no_response',
+                rt: null,
+                timestamp: new Date().toISOString()
+            };
+
+            if (appState.stage === 'test') {
+                appState.results.push(result);
+            }
+
+            updateUI();
+
+            timers.nextTrialTimeout = setTimeout(() => {
+                moveToNextTrial();
+            }, 1000);
+        }
+
+        // 移動到下一個trial
+        function moveToNextTrial() {
+            if (appState.stage === 'practice') {
+                if (appState.practiceCount < 4) {
+                    appState.practiceCount++;
+                    startTrial();
+                } else {
+                    appState.message = '練習結束！點擊開始正式測驗';
+                    appState.stage = 'ready';
+                    showStage('ready');
+                }
+            } else if (appState.stage === 'test' && appState.testActive) {
+                if (appState.currentTrial < 79) {
+                    appState.currentTrial++;
+                    startTrial();
+                } else {
+                    endTest();
+                }
+            }
+        }
+
+        // 開始練習
+        function startPractice() {
+            const subjectId = document.getElementById('subject-id').value.trim();
+            if (!subjectId) {
+                alert('請輸入受測者編號');
+                return;
+            }
+
+            appState.subjectId = subjectId;
+            appState.stage = 'practice';
+            appState.practiceCount = 0;
+            
+            showStage('test');
+            startTrial();
+        }
+
+        // 開始正式測驗
+        function startTest() {
+            appState.stage = 'test';
+            appState.currentTrial = 0;
+            appState.results = [];
+            appState.sessionStartTime = new Date().toISOString();
+            appState.testActive = true;
+            
+            showStage('test');
+            startTrial();
+        }
+
+        // 結束測驗
+        function endTest() {
+            clearAllTimers();
+            appState.testActive = false;
+            appState.sessionEndTime = new Date().toISOString();
+            appState.stage = 'results';
+            appState.showCounter = false;
+            appState.waitingForResponse = false;
+            appState.message = '測驗結束！';
+            
+            updateResultsUI();
+            showStage('results');
+        }
+
+        // 重置測驗
+        function resetTest() {
+            clearAllTimers();
+            appState = {
+                stage: 'setup',
+                subjectId: '',
+                currentTrial: 0,
+                practiceCount: 0,
+                showCounter: false,
+                startTime: null,
+                sessionStartTime: null,
+                sessionEndTime: null,
+                message: '準備開始',
+                results: [],
+                counter: 0,
+                currentISI: 0,
+                waitingForResponse: false,
+                testActive: false
+            };
+            
+            document.getElementById('subject-id').value = '';
+            showStage('setup');
+        }
+
+        // 更新UI
+        function updateUI() {
+            const counter = document.getElementById('counter');
+            const practiceMessage = document.getElementById('practice-message');
+            const messageText = document.getElementById('message-text');
+            const testMessage = document.getElementById('test-message');
+            const stageInfo = document.getElementById('stage-info');
+
+            // 更新計數器
+            if (appState.showCounter) {
+                counter.classList.remove('hidden');
+                counter.textContent = appState.counter;
+                practiceMessage.classList.add('hidden');
+            } else {
+                counter.classList.add('hidden');
+                if (appState.stage === 'practice') {
+                    practiceMessage.classList.remove('hidden');
+                    messageText.textContent = appState.message;
+                } else {
+                    practiceMessage.classList.add('hidden');
+                }
+            }
+
+            // 更新階段資訊
+            if (appState.stage === 'practice') {
+                stageInfo.textContent = `練習 ${appState.practiceCount + 1}`;
+            } else {
+                stageInfo.textContent = '正式測驗進行中...';
+            }
+
+            // 更新測驗訊息
+            if (appState.stage === 'practice' || 
+                (appState.stage === 'test' && 
+                 (appState.message.includes('ms') || 
+                  appState.message.includes('太早') || 
+                  appState.message.includes('無反應')))) {
+                testMessage.classList.remove('hidden');
+                testMessage.textContent = appState.message;
+            } else {
+                testMessage.classList.add('hidden');
+            }
+        }
+
+        // 更新結果UI
+        function updateResultsUI() {
+            const resultInfo = document.getElementById('result-info');
+            const tbody = document.getElementById('results-tbody');
+
+            // 計算統計數據
+            const successResults = appState.results.filter(r => r.result === 'success');
+            const avgRT = successResults.length > 0 ? 
+                (successResults.reduce((sum, r) => sum + r.rt, 0) / successResults.length).toFixed(2) : 'N/A';
+
+            // 更新結果資訊
+            resultInfo.innerHTML = `
+                <p>受測主編號: ${appState.subjectId}</p>
+                <p>開始時間: ${new Date(appState.sessionStartTime).toLocaleString('zh-TW')}</p>
+                <p>結束時間: ${new Date(appState.sessionEndTime).toLocaleString('zh-TW')}</p>
+                <p>總試驗次數: ${appState.results.length}</p>
+                <p>成功試驗次數: ${successResults.length}</p>
+                <p>平均反應時間: ${avgRT} ms</p>
+            `;
+
+            // 更新結果表格
+            tbody.innerHTML = '';
+            appState.results.forEach((result, index) => {
+                const row = document.createElement('tr');
+                const resultText = result.result === 'success' ? '成功' :
+                                 result.result === 'false_start' ? '搶跑' : '無反應';
+                
+                row.innerHTML = `
+                    <td>${result.trial}</td>
+                    <td>${result.isi}</td>
+                    <td>${resultText}</td>
+                    <td>${result.rt || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 下載結果
+        function downloadResults() {
+            const successResults = appState.results.filter(r => r.result === 'success');
+            const avgRT = successResults.length > 0 ? 
+                (successResults.reduce((sum, r) => sum + r.rt, 0) / successResults.length).toFixed(2) : 'N/A';
+
+            let textContent = `reaction time test results\n`;
+            textContent += `========================\n\n`;
+            textContent += `Subject number: ${appState.subjectId}\n`;
+            textContent += `Test start time: ${new Date(appState.sessionStartTime).toLocaleString('zh-TW')}\n`;
+            textContent += `Test end time: ${new Date(appState.sessionEndTime).toLocaleString('zh-TW')}\n`;
+            textContent += `Total trial number: ${appState.results.length}\n`;
+            textContent += `success trial number: ${successResults.length}\n`;
+            textContent += `mean reaction time: ${avgRT} ms\n\n`;
+            textContent += `trial-by-trial results:\n`;
+            textContent += `trial_No. ISI(ms) Response reaction_time(ms)\n`;
+            textContent += `--------------------------------------\n`;
+
+            appState.results.forEach((result) => {
+                const resultText = result.result === 'success' ? 'correct' :
+                                 result.result === 'false_start' ? 'false_start' : 'no_response';
+                textContent += `${result.trial} ${result.isi} ${resultText} ${result.rt || '-'}\n`;
+            });
+
+            try {
+                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `reaction_time_${appState.subjectId}_${new Date().toISOString().split('T')[0]}.txt`;
+                
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('結果已下載為文字檔！');
+            } catch (error) {
+                console.error('下載失敗:', error);
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`<pre>${textContent}</pre>`);
+                newWindow.document.title = `反應時間測試結果_${appState.subjectId}`;
+                alert('下載失敗，已在新視窗中顯示結果，請複製保存。');
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            showStage('setup');
+        });
+
+        // 防止頁面滾動和縮放，但允許表格滾動
+        document.addEventListener('touchmove', function(e) {
+            // 如果觸摸事件發生在結果表格內，允許滾動
+            if (e.target.closest('.results-table')) {
+                return;
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
