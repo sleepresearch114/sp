@@ -255,6 +255,34 @@
             text-align: center;
         }
 
+        .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 10;
+}
+
+.modal-box {
+    background-color: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 340px;
+    width: 100%;
+}
+
+.modal-box p {
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
         .hidden {
             display: none;
         }
@@ -319,19 +347,6 @@
         <div id="results-stage" class="card hidden">
             <h2 class="text-center" style="margin-bottom: 16px;">測驗結果</h2>
             <div class="result-info" id="result-info"></div>
-            <div class="results-table">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>試驗</th>
-                            <th>ISI(ms)</th>
-                            <th>結果</th>
-                            <th>RT(ms)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="results-tbody"></tbody>
-                </table>
-            </div>
             <div class="button-group">
                 <button class="button button-primary" onclick="downloadResults()">
                     下載結果
@@ -477,7 +492,7 @@
                     const reactionTime = Date.now() - appState.startTime;
                     clearAllTimers();
                     appState.showCounter = false;
-                    appState.message = '已記錄反應';
+                    appState.message=appState.stage==='practice'?`反應時間: ${reactionTime} ms`:'已記錄反應';
 
                     const result = {
                         trial: appState.stage === 'practice' ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
@@ -589,29 +604,40 @@
             showStage('results');
         }
 
-        // 重置測驗
-        function resetTest() {
-            clearAllTimers();
-            appState = {
-                stage: 'setup',
-                subjectId: '',
-                currentTrial: 0,
-                practiceCount: 0,
-                showCounter: false,
-                startTime: null,
-                sessionStartTime: null,
-                sessionEndTime: null,
-                message: '準備開始',
-                results: [],
-                counter: 0,
-                currentISI: 0,
-                waitingForResponse: false,
-                testActive: false
-            };
-            
-            document.getElementById('subject-id').value = '';
-            showStage('setup');
-        }
+        // 重置測驗：先跳出確認視窗
+function resetTest() {
+    document.getElementById('confirm-modal').classList.remove('hidden');
+}
+
+// 取消重置
+function cancelReset() {
+    document.getElementById('confirm-modal').classList.add('hidden');
+}
+
+// 確認重置
+function confirmReset() {
+    cancelReset();
+    clearAllTimers();
+    appState = {
+        stage: 'setup',
+        subjectId: '',
+        currentTrial: 0,
+        practiceCount: 0,
+        showCounter: false,
+        startTime: null,
+        sessionStartTime: null,
+        sessionEndTime: null,
+        message: '準備開始',
+        results: [],
+        counter: 0,
+        currentISI: 0,
+        waitingForResponse: false,
+        testActive: false
+    };
+
+    document.getElementById('subject-id').value = '';
+    showStage('setup');
+}
 
         // 更新UI
         function updateUI() {
@@ -657,9 +683,15 @@
         }
 
         // 更新結果UI
-        function updateResultsUI() {
-            const resultInfo = document.getElementById('result-info');
-            const tbody = document.getElementById('results-tbody');
+function updateResultsUI() {
+    const resultInfo = document.getElementById('result-info');
+
+    resultInfo.innerHTML = `
+        <p>受測者編號: ${appState.subjectId}</p>
+        <p>開始時間: ${new Date(appState.sessionStartTime).toLocaleString('zh-TW')}</p>
+        <p>結束時間: ${new Date(appState.sessionEndTime).toLocaleString('zh-TW')}</p>
+    `;
+}
 
             // 計算統計數據
             const successResults = appState.results.filter(r => r.result === 'success');
