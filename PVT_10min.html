@@ -310,6 +310,19 @@
     </div>
 
     <script>
+        // 進入全螢幕（必須由使用者點擊觸發，所以放在按鈕事件裡）
+        function enterFullscreen() {
+            const el = document.documentElement;
+            try {
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                }
+            } catch (e) {
+                console.log('無法進入全螢幕:', e);
+            }
+        }
         // 正式測驗時顯示的固定訊息（不提供任何回饋）
         const RECORDED_MESSAGE = '已記錄反應';
 
@@ -514,10 +527,12 @@
         function startPractice() {
             const subjectId = document.getElementById('subject-id').value.trim();
             if (!subjectId) {
-                alert('請輸入受測者編號');
+                alert('請輸入參與者編號');
                 return;
             }
-
+            
+            enterFullscreen();   // 新增進入全螢幕
+            
             appState.subjectId = subjectId;
             appState.stage = 'practice';
             appState.practiceCount = 0;
@@ -547,6 +562,9 @@
             appState.showCounter = false;
             appState.waitingForResponse = false;
             appState.message = '測驗結束！';
+
+            if (document.fullscreenElement) document.exitFullscreen();
+            else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
 
             updateResultsUI();
             showStage('results');
