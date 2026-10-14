@@ -133,7 +133,7 @@ function onPress(){
       $('prompt').textContent='已記錄';
       S.timer=setTimeout(finish,1000);
     }else{
-      $('prompt').textContent='已記錄，請稍做休息等待下一次試驗';
+      $('prompt').textContent='已記錄，請稍作休息等待下一次試驗';
       S.pendingIti=ITI_MIN_MS+Math.random()*(ITI_MAX_MS-ITI_MIN_MS);
       S.timer=setTimeout(()=>{S.trial++;S.curIti=S.pendingIti;setReady();},S.pendingIti);
     }
