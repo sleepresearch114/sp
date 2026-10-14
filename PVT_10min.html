@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -39,7 +40,6 @@
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 8px;
-            touch-action: manipulation;
         }
 
         .subtitle {
@@ -410,39 +410,6 @@
 
         // 處理按鈕點擊
         function handleButtonPress() {
-            // 在函式外面宣告全域變數，用來記錄點擊次數與時間（放原本 handleButtonPress 的上方即可）
-let secretTapCount = 0;
-let secretTapTimer = null;
-
-// 處理按鈕點擊
-function handleButtonPress() {
-    // ======= 💡 新增：連點 7 次跳出詢問停止實驗 =======
-    if (appState.stage === 'practice' || (appState.stage === 'test' && appState.testActive)) {
-        secretTapCount++;
-        clearTimeout(secretTapTimer);
-        
-        // 超過 1.5 秒沒點下一次就重新計算
-        secretTapTimer = setTimeout(() => {
-            secretTapCount = 0;
-        }, 1500);
-
-        // 當連點滿 7 次時
-        if (secretTapCount >= 7) {
-            secretTapCount = 0; // 重設次數
-
-            // 彈出瀏覽器內建的詢問視窗
-            const confirmStop = confirm("檢測到連續點擊，是否要停止實驗並檢視結果？");
-            if (confirmStop) {
-                // 如果點選「確定」，補上時間並強制結束
-                if (!appState.sessionStartTime) {
-                    appState.sessionStartTime = new Date().toISOString();
-                }
-                clearAllTimers(); // 清除當前所有計時器，防止畫面繼續倒數或亂跳
-                endTest();        // 呼叫結束測驗的函式
-                return;           // 直接中斷，不執行下面原本的按鈕逻辑
-            }
-        }
-    }
             if (appState.stage === 'practice' || (appState.stage === 'test' && appState.testActive)) {
                 const isPractice = appState.stage === 'practice';
 
