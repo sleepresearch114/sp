@@ -313,29 +313,6 @@
     </div>
 
     <script>
-        // 隱藏捷徑：連續點標題 7 次，直接跳到結果畫面
-let secretTapCount = 0;
-let secretTapTimer = null;
-
-document.querySelector('.title').addEventListener('click', function () {
-    // 只在練習、準備、正式測驗階段有效
-    if (!['practice', 'ready', 'test'].includes(appState.stage)) return;
-
-    secretTapCount++;
-    clearTimeout(secretTapTimer);
-    // 每次點擊間隔超過 1.5 秒就重新計數
-    secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 1500);
-
-    if (secretTapCount >= 7) {
-        secretTapCount = 0;
-        // 若從練習階段跳出，補上開始時間，避免結果畫面顯示 1970 年
-        if (!appState.sessionStartTime) {
-            appState.sessionStartTime = new Date().toISOString();
-        }
-        if (!confirm('確定要提前結束測驗嗎？')) return;
-        endTest();
-    }
-});
         // 正式測驗時顯示的固定訊息（不提供任何回饋）
         const RECORDED_MESSAGE = '已記錄反應';
 
@@ -433,6 +410,39 @@ document.querySelector('.title').addEventListener('click', function () {
 
         // 處理按鈕點擊
         function handleButtonPress() {
+            // 在函式外面宣告全域變數，用來記錄點擊次數與時間（放原本 handleButtonPress 的上方即可）
+let secretTapCount = 0;
+let secretTapTimer = null;
+
+// 處理按鈕點擊
+function handleButtonPress() {
+    // 新增連點 7 次跳出詢問停止實驗
+    if (appState.stage === 'practice' || (appState.stage === 'test' && appState.testActive)) {
+        secretTapCount++;
+        clearTimeout(secretTapTimer);
+        
+        // 超過 1.5 秒沒點下一次就重新計算
+        secretTapTimer = setTimeout(() => {
+            secretTapCount = 0;
+        }, 1500);
+
+        // 當連點滿 7 次時
+        if (secretTapCount >= 7) {
+            secretTapCount = 0; // 重設次數
+
+            // 彈出瀏覽器內建的詢問視窗
+            const confirmStop = confirm("檢測到連續點擊，是否要停止實驗並檢視結果？");
+            if (confirmStop) {
+                // 如果點選「確定」，補上時間並強制結束
+                if (!appState.sessionStartTime) {
+                    appState.sessionStartTime = new Date().toISOString();
+                }
+                clearAllTimers(); // 清除當前所有計時器，防止畫面繼續倒數或亂跳
+                endTest();        // 呼叫結束測驗的函式
+                return;           // 直接中斷，不執行下面原本的按鈕邏輯
+            }
+        }
+    }
             if (appState.stage === 'practice' || (appState.stage === 'test' && appState.testActive)) {
                 const isPractice = appState.stage === 'practice';
 
