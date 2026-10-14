@@ -410,36 +410,45 @@
 
         // 處理按鈕點擊
         function handleButtonPress() {
-            // 在函式外面宣告全域變數，用來記錄點擊次數與時間（放原本 handleButtonPress 的上方即可）
+            // 在函式外面宣告全域變數（維持原樣）
 let secretTapCount = 0;
 let secretTapTimer = null;
 
 // 處理按鈕點擊
-function handleButtonPress() {
-    // 新增連點 7 次跳出詢問停止實驗
+function handleButtonPress(e) { // 👈 這裡加上 e 接收事件物件
+    
+    // ======= 💡 針對平板優化的連點 7 次判斷 =======
     if (appState.stage === 'practice' || (appState.stage === 'test' && appState.testActive)) {
+        
+        // 阻斷平板雙擊放大造成的卡頓
+        if (e && typeof e.preventDefault === 'function') {
+            // 如果是觸控引發的事件，防止瀏覽器的預設雙擊行為
+            if (e.type === 'touchstart') {
+                e.preventDefault();
+            }
+        }
+
         secretTapCount++;
         clearTimeout(secretTapTimer);
         
-        // 超過 1.5 秒沒點下一次就重新計算
+        // 平板上連點比較容易慢一點，將重置時間由 1.5 秒放寬到 2.0 秒（2000毫秒）
         secretTapTimer = setTimeout(() => {
             secretTapCount = 0;
-        }, 1500);
+        }, 2000);
 
         // 當連點滿 7 次時
         if (secretTapCount >= 7) {
             secretTapCount = 0; // 重設次數
 
-            // 彈出瀏覽器內建的詢問視窗
+            // 彈出確認視窗
             const confirmStop = confirm("檢測到連續點擊，是否要停止實驗並檢視結果？");
             if (confirmStop) {
-                // 如果點選「確定」，補上時間並強制結束
                 if (!appState.sessionStartTime) {
                     appState.sessionStartTime = new Date().toISOString();
                 }
-                clearAllTimers(); // 清除當前所有計時器，防止畫面繼續倒數或亂跳
-                endTest();        // 呼叫結束測驗的函式
-                return;           // 直接中斷，不執行下面原本的按鈕邏輯
+                clearAllTimers(); 
+                endTest();        
+                return;           
             }
         }
     }
