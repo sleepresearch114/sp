@@ -312,6 +312,29 @@
     </div>
 
     <script>
+        // 隱藏捷徑：連續點標題 7 次，直接跳到結果畫面
+let secretTapCount = 0;
+let secretTapTimer = null;
+
+document.querySelector('.title').addEventListener('click', function () {
+    // 只在練習、準備、正式測驗階段有效
+    if (!['practice', 'ready', 'test'].includes(appState.stage)) return;
+
+    secretTapCount++;
+    clearTimeout(secretTapTimer);
+    // 每次點擊間隔超過 1.5 秒就重新計數
+    secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 1500);
+
+    if (secretTapCount >= 7) {
+        secretTapCount = 0;
+        // 若從練習階段跳出，補上開始時間，避免結果畫面顯示 1970 年
+        if (!appState.sessionStartTime) {
+            appState.sessionStartTime = new Date().toISOString();
+        }
+        if (!confirm('確定要提前結束測驗嗎？')) return;
+        endTest();
+    }
+});
         // 正式測驗時顯示的固定訊息（不提供任何回饋）
         const RECORDED_MESSAGE = '已記錄反應';
 
