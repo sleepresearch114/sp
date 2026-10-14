@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>精神動作警覺度測驗</title>
     <style>
         * {
@@ -207,7 +207,6 @@
             margin-top: 16px;
             font-size: 14px;
             color: #9ca3af;
-            white-space: pre-line;
         }
 
         #message-text {
@@ -287,7 +286,7 @@
                 <div class="red-box">
                     <div id="counter" class="counter hidden"></div>
                     <div id="practice-message" class="text-center hidden">
-                        <div style="color: #9ca3af; font-size: 18px; margin-bottom: 8px;" id="message-text">注意紅色方框，準備按鈕！</div>
+                        <div style="color: #9ca3af; font-size: 18px; margin-bottom: 8px;" id="message-text">注意紅色方框，<br>準備按鈕！</div>
                     </div>
                 </div>
                 <button class="button button-warning" onclick="handleButtonPress()">
@@ -313,19 +312,6 @@
     </div>
 
     <script>
-        // 進入全螢幕（必須由使用者點擊觸發，所以放在按鈕事件裡）
-        function enterFullscreen() {
-            const el = document.documentElement;
-            try {
-                if (el.requestFullscreen) {
-                    el.requestFullscreen().catch(() => {});
-                } else if (el.webkitRequestFullscreen) {
-                    el.webkitRequestFullscreen();
-                }
-            } catch (e) {
-                console.log('無法進入全螢幕:', e);
-            }
-        }
         // 正式測驗時顯示的固定訊息（不提供任何回饋）
         const RECORDED_MESSAGE = '已記錄反應';
 
@@ -387,7 +373,7 @@
 
             clearAllTimers();
             appState.showCounter = false;
-            appState.message = '注意紅色方框，/n準備按鈕！';
+            appState.message = '注意紅色方框，準備按鈕！';
             appState.waitingForResponse = false;
 
             updateUI();
@@ -526,6 +512,33 @@
             }
         }
 
+        // 進入全螢幕（必須由使用者點擊觸發）
+        function enterFullscreen() {
+            const el = document.documentElement;
+            try {
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                }
+            } catch (e) {
+                console.log('無法進入全螢幕:', e);
+            }
+        }
+
+        // 離開全螢幕
+        function exitFullscreen() {
+            try {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitFullscreenElement) {
+                    document.webkitExitFullscreen();
+                }
+            } catch (e) {
+                console.log('無法離開全螢幕:', e);
+            }
+        }
+
         // 開始練習
         function startPractice() {
             const subjectId = document.getElementById('subject-id').value.trim();
@@ -533,9 +546,9 @@
                 alert('請輸入參與者編號');
                 return;
             }
-            
-            enterFullscreen();   // 新增進入全螢幕
-            
+
+            enterFullscreen();
+
             appState.subjectId = subjectId;
             appState.stage = 'practice';
             appState.practiceCount = 0;
@@ -566,9 +579,7 @@
             appState.waitingForResponse = false;
             appState.message = '測驗結束！';
 
-            if (document.fullscreenElement) document.exitFullscreen();
-            else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
-
+            exitFullscreen();
             updateResultsUI();
             showStage('results');
         }
@@ -619,7 +630,7 @@
                 counter.classList.add('hidden');
                 if (appState.stage === 'practice') {
                     practiceMessage.classList.remove('hidden');
-                    messageText.textContent = appState.message;
+                    messageText.textContent = appState.message.replace('注意紅色方框，', '注意紅色方框，\n');
                 } else {
                     practiceMessage.classList.add('hidden');
                 }
@@ -647,7 +658,7 @@
             const resultInfo = document.getElementById('result-info');
 
             resultInfo.innerHTML = `
-                <p>受測者編號: ${appState.subjectId}</p>
+                <p>參與者編號: ${appState.subjectId}</p>
                 <p>開始時間: ${new Date(appState.sessionStartTime).toLocaleString('zh-TW')}</p>
                 <p>結束時間: ${new Date(appState.sessionEndTime).toLocaleString('zh-TW')}</p>
             `;
