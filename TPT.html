@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -50,9 +51,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <h3>測驗說明：</h3>
       <ul>
         <li>每次試驗請按下開始按鈕，並在心中估計10秒的時間長度，覺得10秒到了就按下結束按鈕</li>
-        <li>請勿使用手錶、手機或其他方式計時，也請不要偷看任何有顯示時間的物件</li>
-        <li>共10次試驗，每次試驗之間會有一段隨機長度的間隔</li>
-        <li>準備好後按下下方按鈕進行1次練習，隨後開始正式測驗</li>
+        <li>請勿使用手錶、手機或其他方式計時，也請不要看任何有時間線索的物件</li>
+        <li>共有10次試驗，每次試驗之間會有隨機長度的短暫間隔</li>
+        <li>會先進行1次練習並提供時間長度回饋，正式測驗中不會顯示任何表現回饋</li>
+        <li>若您準備好了請按下開始按鈕進行練習</li>
       </ul>
     </div>
     <button class="button primary" onclick="startSession()">開始測驗</button>
@@ -89,7 +91,7 @@ const TARGET_MS=10000;   // 目標時間間隔
 const TRIALS=10;         // 試驗次數
 const ITI_MIN_MS=10000, ITI_MAX_MS=30000;      // 試驗間隔
 
-function fresh(){return{subjectId:'',trial:0,phase:'idle',t0:0,results:[],start:null,end:null,timer:null};}
+function fresh(){return{subjectId:'',trial:0,phase:'idle',t0:0,practice:false,curIti:null,pendingIti:0,results:[],start:null,end:null,timer:null};}
 let S=fresh();
 
 const $=id=>document.getElementById(id);
@@ -97,7 +99,7 @@ function show(id){['setup','test','done'].forEach(s=>$(s).classList.add('hidden'
 
 function setReady(){
   S.phase='ready';
-  $('trial-info').textContent=S.practice?'練習':`第 ${S.trial+1} / ${TRIALS} 次`;
+  $('trial-info').textContent=S.practice?'練習試驗':`第 ${S.trial+1} / ${TRIALS} 次`;
   $('prompt').textContent=S.practice?'練習：請按下按鈕開始，並在心中估計10秒':'請按下按鈕開始，並在心中估計10秒';
   const b=$('main-btn');b.textContent='開始';b.disabled=false;b.classList.remove('running');
 }
@@ -105,7 +107,7 @@ function setReady(){
 function startSession(){
   const id=$('subject-id').value.trim();
   if(!id){const el=$('subject-id');el.placeholder='請先輸入受測者編號';el.style.borderColor='#ef4444';el.focus();return;}
-  S=fresh();S.subjectId=id;S.start=new Date().toISOString();
+  S=fresh();S.subjectId=id;S.practice=true;S.start=new Date().toISOString();
   show('test');setReady();
 }
 
@@ -113,7 +115,7 @@ function onPress(){
   const now=performance.now();
   if(S.phase==='ready'){
     S.t0=now;S.phase='running';
-    $('prompt').textContent='覺得10秒到了時請按下結束按鈕';
+    $('prompt').textContent='覺得10秒到了，請按下結束按鈕';
     const b=$('main-btn');b.textContent='結束';b.classList.add('running');
   }else if(S.phase==='practiceDone'){
     if(now-S.t0<800)return;
@@ -121,7 +123,7 @@ function onPress(){
   }else if(S.phase==='running'&&S.practice){
     const dur=now-S.t0;S.t0=now;
     S.phase='practiceDone';
-    $('prompt').textContent=`您估計的時間是 ${(dur/1000).toFixed(2)} 秒（目標為10秒）。接下來是正式測驗，不會提供秒數回饋。`;
+    $('prompt').textContent=`您估計的時間是 ${(dur/1000).toFixed(2)} 秒（目標為10秒）。接下來是正式測驗，不會再顯示結果。`;
     const b=$('main-btn');b.textContent='開始正式測驗';b.classList.remove('running');
   }else if(S.phase==='running'){
     S.results.push({trial:S.trial+1,produced:Math.round(now-S.t0),iti:S.curIti===null?null:Math.round(S.curIti),timestamp:new Date().toISOString()});
@@ -131,9 +133,9 @@ function onPress(){
       $('prompt').textContent='已記錄';
       S.timer=setTimeout(finish,1000);
     }else{
-      $('prompt').textContent='已記錄，請稍做休息準備下一次試驗';
-      const iti=ITI_MIN_MS+Math.random()*(ITI_MAX_MS-ITI_MIN_MS);
-      S.timer=setTimeout(()=>{S.trial++;setReady();},iti);
+      $('prompt').textContent='已記錄，請稍做休息等待下一次試驗';
+      S.pendingIti=ITI_MIN_MS+Math.random()*(ITI_MAX_MS-ITI_MIN_MS);
+      S.timer=setTimeout(()=>{S.trial++;S.curIti=S.pendingIti;setReady();},S.pendingIti);
     }
   }
 }
@@ -153,8 +155,8 @@ async function downloadResults(){
   let t=`time production task results\n=============================\n\n`;
   t+=`Subject number: ${S.subjectId}\nTest start time: ${fmt(S.start)}\nTest end time: ${fmt(S.end)}\n`;
   t+=`Target interval: ${TARGET_MS} ms\nTotal trial number: ${S.results.length}\nMean produced interval: ${mean} ms\n\n`;
-  t+=`trial-by-trial results:\ntrial_No. target(ms) produced(ms) error(ms)\n--------------------------------------\n`;
-  S.results.forEach(r=>{t+=`${r.trial} ${TARGET_MS} ${r.produced} ${r.produced-TARGET_MS}\n`;});
+  t+=`trial-by-trial results:\ntrial_No. target(ms) produced(ms) error(ms) preceding_interval(ms)\n--------------------------------------\n`;
+  S.results.forEach(r=>{t+=`${r.trial} ${TARGET_MS} ${r.produced} ${r.produced-TARGET_MS} ${r.iti===null?'-':r.iti}\n`;});
   const filename=`time_production_${S.subjectId}_${new Date().toISOString().split('T')[0]}.txt`;
   try{
     const dl=await claude.use('downloads');
