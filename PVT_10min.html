@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -206,32 +207,6 @@
             color: #9ca3af;
         }
 
-        .results-table {
-            max-height: 192px;
-            overflow-y: auto;
-            margin-bottom: 16px;
-            -webkit-overflow-scrolling: touch;
-            border: 1px solid #374151;
-            border-radius: 4px;
-        }
-
-        .table {
-            width: 100%;
-            font-size: 12px;
-            color: white;
-        }
-
-        .table th {
-            background-color: #1f2937;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .table td {
-            padding: 8px;
-            border-bottom: 1px solid #374151;
-        }
-
         .button-group {
             display: flex;
             gap: 12px;
@@ -255,34 +230,6 @@
             text-align: center;
         }
 
-        .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    z-index: 10;
-}
-
-.modal-box {
-    background-color: #111827;
-    border: 1px solid #374151;
-    border-radius: 8px;
-    padding: 24px;
-    max-width: 340px;
-    width: 100%;
-}
-
-.modal-box p {
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
         .hidden {
             display: none;
         }
@@ -299,19 +246,19 @@
         <!-- Setup Stage -->
         <div id="setup-stage" class="card">
             <div class="form-group">
-                <label class="label">受測者編號</label>
+                <label class="label">👤 受測者編號</label>
                 <input type="text" id="subject-id" class="input" placeholder="輸入編號">
             </div>
             <div class="instructions">
                 <h3>測驗說明：</h3>
                 <ul>
-                    <li> 請注意紅色方框，當黃色計數器出現時立即按下按鈕</li>
-                    <li> 請以慣用手之單一指頭按按鈕</li>
-                    <li> 先進行5次練習，再進行正式測驗</li>
+                    <li>• 請注意紅色方框，當黃色計數器出現時立即按下按鈕</li>
+                    <li>• 請以慣用手之單一指頭按按鈕</li>
+                    <li>• 先進行5次練習，再進行正式測驗</li>
                 </ul>
             </div>
             <button class="button button-primary" onclick="startPractice()">
-                開始練習
+                ▶️ 開始練習
             </button>
         </div>
 
@@ -320,7 +267,7 @@
             <h2 class="text-center" style="margin-bottom: 16px;">練習完成！</h2>
             <p class="text-center" style="color: #9ca3af; margin-bottom: 24px;">準備開始正式測驗</p>
             <button class="button button-success" onclick="startTest()">
-                開始正式測驗
+                ▶️ 開始正式測驗
             </button>
         </div>
 
@@ -333,7 +280,7 @@
                 <div class="red-box">
                     <div id="counter" class="counter hidden"></div>
                     <div id="practice-message" class="text-center hidden">
-                        <div style="color: #9ca3af; font-size: 18px; margin-bottom: 8px; white-space: pre-line;" id="message-text">注意紅色方框，<br>準備按鈕！</div>
+                        <div style="color: #9ca3af; font-size: 18px; margin-bottom: 8px;" id="message-text">注意紅色方框，準備按鈕！</div>
                     </div>
                 </div>
                 <button class="button button-warning" onclick="handleButtonPress()">
@@ -349,26 +296,19 @@
             <div class="result-info" id="result-info"></div>
             <div class="button-group">
                 <button class="button button-primary" onclick="downloadResults()">
-                    下載結果
+                    📥 下載結果
                 </button>
                 <button class="button button-secondary" onclick="resetTest()">
-                    重新測驗
+                    🔄 重新測驗
                 </button>
             </div>
         </div>
     </div>
 
-<div id="confirm-modal" class="modal hidden">
-  <div class="modal-box">
-    <p>尚未下載的資料將會消失，確定要重新測驗嗎？</p>
-    <div class="button-group">
-      <button class="button button-secondary" onclick="cancelReset()">取消</button>
-      <button class="button button-primary" onclick="confirmReset()">確定</button>
-    </div>
-  </div>
-</div>
-    
     <script>
+        // 正式測驗時顯示的固定訊息（不提供任何回饋）
+        const RECORDED_MESSAGE = '已記錄反應';
+
         // 應用程式狀態
         let appState = {
             stage: 'setup',
@@ -427,7 +367,7 @@
 
             clearAllTimers();
             appState.showCounter = false;
-            appState.message = '注意紅色方框，\n準備按鈕！';
+            appState.message = '注意紅色方框，準備按鈕！';
             appState.waitingForResponse = false;
 
             updateUI();
@@ -464,14 +404,16 @@
         // 處理按鈕點擊
         function handleButtonPress() {
             if (appState.stage === 'practice' || (appState.stage === 'test' && appState.testActive)) {
+                const isPractice = appState.stage === 'practice';
+
                 if (!appState.waitingForResponse) {
                     // 太早按下 - false start
                     clearAllTimers();
                     appState.showCounter = false;
-                    appState.message = '太早按下！請等待黃色計數器出現';
+                    appState.message = isPractice ? '太早按下！請等待黃色計數器出現' : RECORDED_MESSAGE;
 
                     const result = {
-                        trial: appState.stage === 'practice' ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
+                        trial: isPractice ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
                         isi: appState.currentISI,
                         result: 'false_start',
                         rt: null,
@@ -488,14 +430,15 @@
                         moveToNextTrial();
                     }, 1000);
                 } else {
-                    // 正確反應 刪除回饋appState.message = `反應時間: ${reactionTime} ms`;
+                    // 正確反應
                     const reactionTime = Date.now() - appState.startTime;
                     clearAllTimers();
                     appState.showCounter = false;
-                    appState.message=appState.stage==='practice'?`反應時間: ${reactionTime} ms`:'已記錄反應';
+                    appState.waitingForResponse = false;
+                    appState.message = isPractice ? `反應時間: ${reactionTime} ms` : RECORDED_MESSAGE;
 
                     const result = {
-                        trial: appState.stage === 'practice' ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
+                        trial: isPractice ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
                         isi: appState.currentISI,
                         result: 'success',
                         rt: reactionTime,
@@ -518,12 +461,13 @@
         // 處理無反應
         function handleNoResponse() {
             clearAllTimers();
+            const isPractice = appState.stage === 'practice';
             appState.showCounter = false;
-            appState.message = '無反應！';
+            appState.message = isPractice ? '無反應！' : RECORDED_MESSAGE;
             appState.waitingForResponse = false;
 
             const result = {
-                trial: appState.stage === 'practice' ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
+                trial: isPractice ? `練習${appState.practiceCount + 1}` : appState.currentTrial + 1,
                 isi: appState.currentISI,
                 result: 'no_response',
                 rt: null,
@@ -573,7 +517,7 @@
             appState.subjectId = subjectId;
             appState.stage = 'practice';
             appState.practiceCount = 0;
-            
+
             showStage('test');
             startTrial();
         }
@@ -585,7 +529,7 @@
             appState.results = [];
             appState.sessionStartTime = new Date().toISOString();
             appState.testActive = true;
-            
+
             showStage('test');
             startTrial();
         }
@@ -599,45 +543,39 @@
             appState.showCounter = false;
             appState.waitingForResponse = false;
             appState.message = '測驗結束！';
-            
+
             updateResultsUI();
             showStage('results');
         }
 
-        // 重置測驗：先跳出確認視窗
-function resetTest() {
-    document.getElementById('confirm-modal').classList.remove('hidden');
-}
+        // 重置測驗（需確認，避免誤刪資料）
+        function resetTest() {
+            const confirmed = confirm('⚠️ 警告：重新測驗將刪除目前所有測驗資料，且無法復原。\n\n若尚未下載結果，請先按「下載結果」。\n\n確定要刪除資料並重新測驗嗎？');
+            if (!confirmed) {
+                return;
+            }
 
-// 取消重置
-function cancelReset() {
-    document.getElementById('confirm-modal').classList.add('hidden');
-}
+            clearAllTimers();
+            appState = {
+                stage: 'setup',
+                subjectId: '',
+                currentTrial: 0,
+                practiceCount: 0,
+                showCounter: false,
+                startTime: null,
+                sessionStartTime: null,
+                sessionEndTime: null,
+                message: '準備開始',
+                results: [],
+                counter: 0,
+                currentISI: 0,
+                waitingForResponse: false,
+                testActive: false
+            };
 
-// 確認重置
-function confirmReset() {
-    cancelReset();
-    clearAllTimers();
-    appState = {
-        stage: 'setup',
-        subjectId: '',
-        currentTrial: 0,
-        practiceCount: 0,
-        showCounter: false,
-        startTime: null,
-        sessionStartTime: null,
-        sessionEndTime: null,
-        message: '準備開始',
-        results: [],
-        counter: 0,
-        currentISI: 0,
-        waitingForResponse: false,
-        testActive: false
-    };
-
-    document.getElementById('subject-id').value = '';
-    showStage('setup');
-}
+            document.getElementById('subject-id').value = '';
+            showStage('setup');
+        }
 
         // 更新UI
         function updateUI() {
@@ -669,12 +607,9 @@ function confirmReset() {
                 stageInfo.textContent = '正式測驗進行中...';
             }
 
-            // 更新測驗訊息
-            if (appState.stage === 'practice' || 
-                (appState.stage === 'test' && 
-                 (appState.message.includes('ms') || 
-                  appState.message.includes('太早') || 
-                  appState.message.includes('無反應')))) {
+            // 更新測驗訊息（練習：完整回饋；正式：僅顯示「已記錄反應」）
+            if (appState.stage === 'practice' ||
+                (appState.stage === 'test' && appState.message === RECORDED_MESSAGE)) {
                 testMessage.classList.remove('hidden');
                 testMessage.textContent = appState.message;
             } else {
@@ -682,53 +617,21 @@ function confirmReset() {
             }
         }
 
-        // 更新結果UI
-function updateResultsUI() {
-    const resultInfo = document.getElementById('result-info');
+        // 更新結果UI（只顯示受測者編號、開始與結束時間）
+        function updateResultsUI() {
+            const resultInfo = document.getElementById('result-info');
 
-    resultInfo.innerHTML = `
-        <p>受測者編號: ${appState.subjectId}</p>
-        <p>開始時間: ${new Date(appState.sessionStartTime).toLocaleString('zh-TW')}</p>
-        <p>結束時間: ${new Date(appState.sessionEndTime).toLocaleString('zh-TW')}</p>
-    `;
-}
-
-            // 計算統計數據
-            const successResults = appState.results.filter(r => r.result === 'success');
-            const avgRT = successResults.length > 0 ? 
-                (successResults.reduce((sum, r) => sum + r.rt, 0) / successResults.length).toFixed(2) : 'N/A';
-
-            // 更新結果資訊
             resultInfo.innerHTML = `
-                <p>受測主編號: ${appState.subjectId}</p>
+                <p>受測者編號: ${appState.subjectId}</p>
                 <p>開始時間: ${new Date(appState.sessionStartTime).toLocaleString('zh-TW')}</p>
                 <p>結束時間: ${new Date(appState.sessionEndTime).toLocaleString('zh-TW')}</p>
-                <p>總試驗次數: ${appState.results.length}</p>
-                <p>成功試驗次數: ${successResults.length}</p>
-                <p>平均反應時間: ${avgRT} ms</p>
             `;
-
-            // 更新結果表格
-            tbody.innerHTML = '';
-            appState.results.forEach((result, index) => {
-                const row = document.createElement('tr');
-                const resultText = result.result === 'success' ? '成功' :
-                                 result.result === 'false_start' ? '搶跑' : '無反應';
-                
-                row.innerHTML = `
-                    <td>${result.trial}</td>
-                    <td>${result.isi}</td>
-                    <td>${resultText}</td>
-                    <td>${result.rt || '-'}</td>
-                `;
-                tbody.appendChild(row);
-            });
         }
 
-        // 下載結果
+        // 下載結果（內容不變）
         function downloadResults() {
             const successResults = appState.results.filter(r => r.result === 'success');
-            const avgRT = successResults.length > 0 ? 
+            const avgRT = successResults.length > 0 ?
                 (successResults.reduce((sum, r) => sum + r.rt, 0) / successResults.length).toFixed(2) : 'N/A';
 
             let textContent = `reaction time test results\n`;
@@ -755,12 +658,12 @@ function updateResultsUI() {
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `reaction_time_${appState.subjectId}_${new Date().toISOString().split('T')[0]}.txt`;
-                
+
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
                 alert('結果已下載為文字檔！');
             } catch (error) {
                 console.error('下載失敗:', error);
@@ -776,12 +679,8 @@ function updateResultsUI() {
             showStage('setup');
         });
 
-        // 防止頁面滾動和縮放，但允許表格滾動
+        // 防止頁面滾動和縮放
         document.addEventListener('touchmove', function(e) {
-            // 如果觸摸事件發生在結果表格內，允許滾動
-            if (e.target.closest('.results-table')) {
-                return;
-            }
             e.preventDefault();
         }, { passive: false });
 
