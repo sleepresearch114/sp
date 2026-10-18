@@ -513,33 +513,6 @@
             }
         }
 
-        // 進入全螢幕（必須由使用者點擊觸發）
-        function enterFullscreen() {
-            const el = document.documentElement;
-            try {
-                if (el.requestFullscreen) {
-                    el.requestFullscreen().catch(() => {});
-                } else if (el.webkitRequestFullscreen) {
-                    el.webkitRequestFullscreen();
-                }
-            } catch (e) {
-                console.log('無法進入全螢幕:', e);
-            }
-        }
-
-        // 離開全螢幕
-        function exitFullscreen() {
-            try {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen().catch(() => {});
-                } else if (document.webkitFullscreenElement) {
-                    document.webkitExitFullscreen();
-                }
-            } catch (e) {
-                console.log('無法離開全螢幕:', e);
-            }
-        }
-
         // 開始練習
         function startPractice() {
             const subjectId = document.getElementById('subject-id').value.trim();
