@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -45,7 +44,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 
   <div id="setup" class="card">
-    <label class="label">受測者編號</label>
+    <label class="label">參與者編號</label>
     <input type="text" id="subject-id" class="input" placeholder="輸入編號">
     <div class="instructions">
       <h3>測驗說明：</h3>
@@ -106,7 +105,7 @@ function setReady(){
 
 function startSession(){
   const id=$('subject-id').value.trim();
-  if(!id){const el=$('subject-id');el.placeholder='請先輸入受測者編號';el.style.borderColor='#ef4444';el.focus();return;}
+  if(!id){const el=$('subject-id');el.placeholder='請先輸入參與者編號';el.style.borderColor='#ef4444';el.focus();return;}
   S=fresh();S.subjectId=id;S.practice=true;S.start=new Date().toISOString();
   show('test');setReady();
 }
