@@ -521,8 +521,6 @@
                 return;
             }
 
-            enterFullscreen();
-
             appState.subjectId = subjectId;
             appState.stage = 'practice';
             appState.practiceCount = 0;
@@ -553,7 +551,6 @@
             appState.waitingForResponse = false;
             appState.message = '測驗結束！';
 
-            exitFullscreen();
             updateResultsUI();
             showStage('results');
         }
