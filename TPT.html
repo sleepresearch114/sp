@@ -156,7 +156,7 @@ async function downloadResults(){
   t+=`Target interval: ${TARGET_MS} ms\nTotal trial number: ${S.results.length}\nMean produced interval: ${mean} ms\n\n`;
   t+=`trial-by-trial results:\ntrial_No. target(ms) produced(ms) error(ms) preceding_interval(ms)\n--------------------------------------\n`;
   S.results.forEach(r=>{t+=`${r.trial} ${TARGET_MS} ${r.produced} ${r.produced-TARGET_MS} ${r.iti===null?'-':r.iti}\n`;});
-  const filename=`time_production_${S.subjectId}_${new Date().toISOString().split('T')[0]}.txt`;
+  const filename=`TPT_${S.subjectId}_${new Date().toISOString().split('T')[0]}.txt`;
   try{
     const dl=await claude.use('downloads');
     if(dl){await dl.save({filename,data:t});return;}
